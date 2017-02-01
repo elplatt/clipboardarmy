@@ -1,0 +1,41 @@
+From eaf8e2780108973340112877f14b75f622b5c081 Mon Sep 17 00:00:00 2001
+From: Ro$k0
+Date: Fri, 20 May 2016 21:32:33 +1200
+Subject: Fixed Fatal error: Call to undefined method stdClass::label() when
+ migrating contacts.
+
+---
+ modules/crm_core_contact/crm_core_contact.module                  | 3 +--
+ modules/crm_core_contact/includes/crm_core_contact.controller.inc | 2 +-
+ 2 files changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/modules/crm_core_contact/crm_core_contact.module b/modules/crm_core_contact/crm_core_contact.module
+index c322ac1..e0585ae 100644
+--- a/modules/crm_core_contact/crm_core_contact.module
++++ b/modules/crm_core_contact/crm_core_contact.module
+@@ -514,8 +514,7 @@ function crm_core_contact_label($contact) {
+       return $function($contact);
+     }
+ 
+-    /* @var CRMCoreContactEntity $contact */
+-    $contact_wrapper = $contact->wrapper();
++    $contact_wrapper = entity_metadata_wrapper('crm_core_contact', $contact);
+     $field_info = field_info_field('contact_name');
+ 
+     $item = $field_info['cardinality'] == '1' ? $contact_wrapper->contact_name->value() : $contact_wrapper->contact_name[0]->value();
+diff --git a/modules/crm_core_contact/includes/crm_core_contact.controller.inc b/modules/crm_core_contact/includes/crm_core_contact.controller.inc
+index 3f98169..6ee29a8 100644
+--- a/modules/crm_core_contact/includes/crm_core_contact.controller.inc
++++ b/modules/crm_core_contact/includes/crm_core_contact.controller.inc
+@@ -104,7 +104,7 @@ class CRMCoreContactController extends EntityAPIController {
+   public function save($contact) {
+     $contact->changed = REQUEST_TIME;
+     // Storing formatted contact label for autocomplete lookups.
+-    $contact->name = $contact->label();
++    $contact->name = crm_core_contact_label($contact);
+ 
+     return parent::save($contact);
+   }
+-- 
+cgit v0.12
+
